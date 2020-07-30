@@ -1,3 +1,5 @@
+#' @param url string. The url
+#' @param selector string. The selctor to use to scrape the page.
 scrape_links <- function(url, selector) {
  
   xml2::read_html(url) %>% 
@@ -7,87 +9,27 @@ scrape_links <- function(url, selector) {
 
 #' @param page list. HTML page
 #' @param selector character. The selector to use to scrape the page
-scrape_inner <- function(page, selector) {
+scrape_text <- function(page, selector) {
 
-  page %>% 
-    rvest::html_nodes(selector) %>% 
-    rvest::html_text() %>% 
-    stringr::str_trim("both")
+  if(!is.null(selector)) {
+    return(page %>% 
+      rvest::html_nodes(selector) %>% 
+      rvest::html_text() %>% 
+      stringr::str_trim("both")
+    )
+  } else {
+    return(NA)
+  }
+  
 }
 
-#' @title University of Washington
-faculty.uw <- function(url = "https://ischool.uw.edu/people/faculty") {
+collapse <- function(l) {
 
-  links <- scrape_links(url = url, selector = ".h1 > a")
-
-  links <- paste0(url, gsub("/people/faculty", "", links))
-
-  l <- lapply(links, function(link) {
-
-    page <- xml2::read_html(link)
-
-    name <- scrape_inner(page = page, selector = "div > article > div.info > h1")
-    
-    title <- scrape_inner(page = page, selector = "div > article > div.info > em")
-
-    email <- page %>% 
-      rvest::html_nodes("div > article > div.info > address > a") %>% 
-      rvest::html_attr("href")
-
-    email <- gsub("mailto:", "", email)
-    
-    specializations <- scrape_inner(page = page, selector = ".sections > .specialization > ul > li")
-
-    research_area <- scrape_inner(page = page, selector = ".sections > .research_areas > ul > li")
-
-    bio <- scrape_inner(page = page, selector = ".sections > .biography")
-
-    edu <- scrape_inner(page = page, selector = ".sections > .education > ul > li")
-
-    pub <- scrape_inner(page = page, selector = ".pub > .title")
-
-    id <- data.frame(name, title, email, stringsAsFactors = FALSE)
-
-    if(length(specializations) > 0) {
-      specializations <- data.frame(email, specializations, stringsAsFactors = FALSE)
-    } else {
-      specializations <- NULL
-    }
-
-    if(length(research_area) > 0) {
-      research_area <- data.frame(email, research_area, stringsAsFactors = FALSE) 
-    } else {
-      research_area <- NULL
-    }
-
-    if(length(bio) > 0) {
-      bio <- data.frame(email, bio, stringsAsFactors = FALSE) 
-    } else {
-      bio <- NULL
-    }
-
-    if(length(edu) > 0 ) {
-      edu <- data.frame(email, edu, stringsAsFactors = FALSE)
-    } else {
-      edu <- NULL
-    }
-
-    if(length(pub) > 0) {
-      pub <- data.frame(email, pub, stringsAsFactors = FALSE)
-    } else {
-      pub <- NULL
-    }
-
-    return(list(id = id, specializations = specializations, research_area = research_area,
-                bio = bio, edu = edu, pub = pub))
-    
-  })
-  
   l2 <- l %>% 
+    plyr::compact() %>% 
     purrr::transpose()
-  
-  id <- do.call(rbind, l2[["id"]]) %>% 
-    dplyr::mutate(ischool = "University of Washington")
+
+  id <- do.call(rbind, l2[["id"]])
   
   specializations <- do.call(rbind, l2[["specializations"]])
   
@@ -101,9 +43,112 @@ faculty.uw <- function(url = "https://ischool.uw.edu/people/faculty") {
   
   return(list(id = id, specializations = specializations, research_area = research_area,
               bio = bio, edu = edu, pub = pub))
+  
 }
 
-#' @title University of Michigan
+collect_info <- function(link, ischool,
+                         name_selector = NULL,
+                         title_selector = NULL,
+                         email_selector = NULL,
+                         phone_selector = NULL,
+                         spec_selector  = NULL,
+                         research_selector = NULL,
+                         bio_selector = NULL,
+                         edu_selector = NULL,
+                         pub_selector = NULL,
+                         phd_selector = NULL) {
+
+  page <- xml2::read_html(link)
+
+  name <- scrape_text(page = page, selector = name_selector)
+  assertthat::assert_that(length(name) == 1 | is.null(name))
+
+  title <- scrape_text(page = page, selector = title_selector)
+  assertthat::assert_that(length(title) == 1 | is.null(title))
+
+  email <- scrape_text(page = page, selector = email_selector)
+  assertthat::assert_that(length(email) == 1 | is.null(email))
+  
+  phone <- scrape_text(page = page, selector = phone_selector)
+  assertthat::assert_that(length(phone == 1) | is.null(phone))
+  
+  phd_adv <- scrape_text(page = page, selector = phd_selector)
+  assertthat::assert_that(length(phd_adv) == 1 | is.null(phd_adv))
+  
+  specializations <- scrape_text(page = page, selector = spec_selector)
+
+  research_area <- scrape_text(page = page, selector = research_selector)
+
+  bio <- scrape_text(page = page, selector = bio_selector)
+
+  edu <- scrape_text(page = page, selector = edu_selector)
+
+  pub <- scrape_text(page = page, selector = pub_selector)
+
+  id <- data.frame(name, title, email, phone, ischool, phd_adv, stringsAsFactors = FALSE)
+  
+  if(length(specializations) > 0) {
+    specializations <- data.frame(email, specializations, stringsAsFactors = FALSE)
+  } else {
+    specializations <- NULL
+  }
+  
+  if(length(research_area) > 0) {
+    research_area <- data.frame(email, research_area, stringsAsFactors = FALSE) 
+  } else {
+    research_area <- NULL
+  }
+  
+  if(length(bio) > 0) {
+    bio <- data.frame(email, bio, stringsAsFactors = FALSE) 
+  } else {
+    bio <- NULL
+  }
+  
+  if(length(edu) > 0 ) {
+    edu <- data.frame(email, edu, stringsAsFactors = FALSE)
+  } else {
+    edu <- NULL
+  }
+  
+  if(length(pub) > 0) {
+    pub <- data.frame(email, pub, stringsAsFactors = FALSE)
+  } else {
+    pub <- NULL
+  }
+
+  return(list(id = id, specializations = specializations, research_area = research_area,
+              bio = bio, edu = edu, pub = pub))
+}
+
+
+#' @title Scrape faculty page at University of Washington
+faculty.uw <- function(url = "https://ischool.uw.edu/people/faculty") {
+
+  links <- scrape_links(url = url, selector = ".h1 > a")
+
+  links <- paste0(url, gsub("/people/faculty", "", links))
+
+  l <- lapply(links, 
+              collect_info, 
+              ischool = "University of Washington",
+              name_selector = "div > article > div.info > h1",
+              title_selector = "div > article > div.info > em",
+              email_selector = "div > article > div.info > address > a",
+              phone_selector = NULL,
+              phd_selector = NULL,
+              spec_selector = ".sections > .specialization > ul > li",
+              research_selector = ".sections > .research_areas > ul > li",
+              bio_selector = ".sections > .biography",
+              edu_selector = ".sections > .education > ul > li",
+              pub_selector = ".pub > .title")
+
+  l <- collapse(l)
+  
+  return(l)
+}
+
+#' @title Scrape faculty page at University of Michigan
 faculty.um <- function(url = "https://www.si.umich.edu/people/directory/faculty?page={n}") {
   
   urls <- glue::glue(url, n = 0:6)
@@ -116,23 +161,24 @@ faculty.um <- function(url = "https://www.si.umich.edu/people/directory/faculty?
   
   links <- paste0("https://www.si.umich.edu", unlist(links, recursive = FALSE))
 
-  l <- lapply(links, function(link) {
-    
-    page <- xml2::read_html(link)
+  l <- lapply(links,
+              collect_info, 
+              ischool = "University of Michigan",
+              name_selector = "div > div > div > h1 > span",
+              title_selector = "div > div > div > div > div > div.profile-card__left > span:nth-child(1) > strong",
+              email_selector = "div > div > div > div > div > div.profile-card__left > span > a",
+              phone_selector = NULL,
+              phd_selector = "div > div > div > div > div > div.profile-card__right > span:nth-child(3)",
+              spec_selector = NULL,
+              research_selector = "div > div > div > div > ul > li",
+              bio_selector = "div > div > div > div > div > p",
+              edu_selector = "div > div > div > div > div > p",
+              pub_selector = NULL)
 
-    name <- page %>% 
-      rvest::html_node("div > div > div > h1 > span") %>% 
-      rvest::html_text()
-    
-    title <- page %>% 
-      rvest::html_node("div > div > div > div > div > div.profile-card__left > span > strong") %>% 
-      rvest::html_text() %>% 
-      stringr::str_trim("both")
-    
-    email <- page %>% 
-      rvest::html_node("div > div > div > div > div > div.profile-card__left > span > a") %>% 
-      rvest::html_text()
-    
-  })
-
+  l <- collapse(l)
+  
+  return(l)
 }
+
+#' @title Scrape faculty page at University of Illinois
+faculty.illinois <- function(url = "https://ischool.illinois.edu/people/faculty") {}
