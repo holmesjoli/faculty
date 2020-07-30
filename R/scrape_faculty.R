@@ -1,3 +1,43 @@
+#' @title Parse Research Area
+parse.research_area <- function(df) {
+  
+  df <- df %>% 
+    dplyr::mutate(data_science = grepl("data science", tolower(research_area)),
+                  library_science = grepl("library science|library sciences|library", tolower(research_area)),
+                  privacy = grepl("privacy|security", tolower(research_area)),
+                  sts = grepl("science, technology, and society|science, technology & society|sts", tolower(research_area)),
+                  archive = grepl("archive", tolower(research_area)),
+                  hci = grepl("human-computer interaction|human computer interaction|hci", tolower(research_area)),
+                  visualization = grepl("visualization", tolower(research_area)))
+}
+
+#' @title Parse Education
+parse.edu <- function(df) {
+  
+  df <- df %>%
+    dplyr::mutate(phd = grepl("PhD|Ph D|Ph.D.", edu),
+                  ms = grepl("MS|M.S.|Master|master|ScM|MEng|MSC", edu),
+                  ma = grepl("MA|M.A.|Master|master", edu),
+                  med = grepl("M.Ed.|EdM|EDD", edu),
+                  mlis = grepl("MLIS|M.I.M.S|MIMS|A.M.L.S.|AMLS", edu),
+                  mba = grepl("MBA", edu),
+                  mph = grepl("MPH", edu),
+                  mpa = grepl("MPA", edu),
+                  mfa = grepl("MFA", edu),
+                  add_masters = grepl("MDP|MDes|MTech|LLM|M.Tech", edu),
+                  bs = grepl("BS|B.S.|BAS|B.A.S|Bachelor|bachelor|Sc.B|BSC", edu),
+                  ba = grepl("BA|B.A|Bachelor|bachelor|AB|A.B.", edu),
+                  be = grepl("BE|B.E", edu),
+                  jd = grepl("JD", edu),
+                  ba = ifelse(mba & ba, FALSE, ba),
+                  masters = ifelse(ms|ma|med|mlis|mba|mph|mpa|add_masters, TRUE, FALSE),
+                  bachelors = ifelse(bs|ba|be, TRUE, FALSE))
+  
+  df$degree <- rowSums(df[c("phd", "masters", "bachelors", "jd")])
+  
+  return(df)
+}
+
 #' @param url string. The url
 #' @param selector string. The selctor to use to scrape the page.
 scrape_links <- function(url, selector) {
@@ -158,7 +198,7 @@ faculty.um <- function(url = "https://www.si.umich.edu/people/directory/faculty?
       rvest::html_nodes(" div > div > div > h2 > a") %>% 
       rvest::html_attr("href")
   })
-  
+
   links <- paste0("https://www.si.umich.edu", unlist(links, recursive = FALSE))
 
   l <- lapply(links,
@@ -181,4 +221,7 @@ faculty.um <- function(url = "https://www.si.umich.edu/people/directory/faculty?
 }
 
 #' @title Scrape faculty page at University of Illinois
-faculty.illinois <- function(url = "https://ischool.illinois.edu/people/faculty") {}
+faculty.illinois <- function(url = "https://ischool.illinois.edu/people/faculty") {
+  
+  
+}
