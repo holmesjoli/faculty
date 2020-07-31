@@ -6,17 +6,16 @@ uw <- faculty.uw()
 
 um <- faculty.um()
 
-l <- list(uw, um) %>% 
+illinois <- faculty.illinois()
+
+l <- list(uw, um, illinois) %>% 
   purrr::transpose()
 
 id <- do.call(rbind, l[["id"]]) %>% 
-  dplyr::mutate(phd_adv = gsub("Potential PhD Faculty Advisor: ", "", phd_adv),
-                phd_adv = ifelse(phd_adv == "", NA, phd_adv),
-                emeritus = grepl("emeritus", tolower(title)),
-                research_fellow = grepl("research fellow|fellow", tolower(title))) %>% 
+  parse.id() %>%
   dplyr::filter(phd_adv %in% c("Yes", NA)) %>% 
-  dplyr::filter(!(title %in% c("Ph.D. Candidate", "Ph.D. Student"))) %>% 
-  dplyr::filter(emeritus == FALSE & research_fellow == FALSE)
+  dplyr::filter(assistant | associate) %>% 
+  dplyr::filter(adjunct == FALSE & emeritus == FALSE & lecturer == FALSE & research_fellow == FALSE)
 
 potential_adv <- id$email
 
@@ -37,7 +36,8 @@ write.csv(bio, "./data/biography.csv", row.names = FALSE)
 
 edu <- do.call(rbind, l[["edu"]]) %>% 
   dplyr::filter(email %in% potential_adv) %>% 
-  parse.edu()
+  parse.edu() %>% 
+  dplyr::filter(degree >= 1)
 write.csv(edu, "./data/education.csv", row.names = FALSE)
 
 pub <- do.call(rbind, l[["pub"]]) %>% 
