@@ -136,7 +136,7 @@ collect_info <- function(link, ischool,
                          edu_selector = NULL,
                          pub_selector = NULL,
                          phd_selector = NULL,
-                         delay = 2) {
+                         delay = NULL) {
 
   page <- xml2::read_html(link)
 
@@ -148,7 +148,7 @@ collect_info <- function(link, ischool,
 
   email <- scrape_text(page = page, selector = email_selector)
   assertthat::assert_that(length(email) == 1 | is.null(email))
-  
+
   phone <- scrape_text(page = page, selector = phone_selector)
   assertthat::assert_that(length(phone == 1) | is.null(phone))
 
@@ -158,10 +158,10 @@ collect_info <- function(link, ischool,
   } else {
     email <- email
   }
-  
+
   phd_adv <- scrape_text(page = page, selector = phd_selector)
   assertthat::assert_that(length(phd_adv) == 1 | is.null(phd_adv))
-  
+
   specializations <- scrape_text(page = page, selector = spec_selector)
 
   research_area <- scrape_text(page = page, selector = research_selector)
@@ -173,7 +173,7 @@ collect_info <- function(link, ischool,
   pub <- scrape_text(page = page, selector = pub_selector)
 
   id <- data.frame(name, title, email, phone, ischool, phd_adv, link, stringsAsFactors = FALSE)
-  
+
   if(length(specializations) > 0) {
     specializations <- data.frame(email, specializations, stringsAsFactors = FALSE)
   } else {
@@ -204,42 +204,103 @@ collect_info <- function(link, ischool,
     pub <- NULL
   }
 
-  Sys.sleep(delay)
+  if(!is.null(delay)) {
+    Sys.sleep(delay) 
+  }
 
   return(list(id = id, specializations = specializations, research_area = research_area,
               bio = bio, edu = edu, pub = pub))
 }
 
-#' @title Scrape faculty page at University of Washington
-faculty.uw <- function(url = "https://ischool.uw.edu{query}",
-                       query = "/people/faculty",
-                       faculty_selector = ".h1 > a") {
+collect_info_main <- function(url, query, ischool,
+                              faculty_selector,
+                              name_selector = NULL,
+                              title_selector = NULL,
+                              email_selector = NULL,
+                              phone_selector = NULL,
+                              phd_selector = NULL,
+                              spec_selector = NULL,
+                              research_selector = NULL,
+                              bio_selector = NULL,
+                              edu_selector = NULL,
+                              pub_selector = NULL,
+                              delay = NULL) {
 
   links <- scrape_faculty_pages(url = url, query = query, selector = faculty_selector)
 
   l <- lapply(links, 
               collect_info, 
-              ischool = "University of Washington",
-              name_selector = "div > article > div.info > h1",
-              title_selector = "div > article > div.info > em",
-              email_selector = "div > article > div.info > address > a",
-              phone_selector = NULL,
-              phd_selector = NULL,
-              spec_selector = ".sections > .specialization > ul > li",
-              research_selector = ".sections > .research_areas > ul > li",
-              bio_selector = ".sections > .biography",
-              edu_selector = ".sections > .education > ul > li",
-              pub_selector = ".pub > .title")
+              ischool = ischool,
+              name_selector = name_selector,
+              title_selector = title_selector,
+              email_selector = email_selector,
+              phone_selector = phone_selector,
+              phd_selector = phd_selector,
+              spec_selector = spec_selector,
+              research_selector = research_selector,
+              bio_selector = bio_selector,
+              edu_selector = edu_selector,
+              pub_selector = pub_selector,
+              delay = delay)
 
   l <- collapse(l)
 
   return(l)
 }
 
+
+#' #' @title Scrape faculty page at University of Washington
+#' faculty.uw <- function(url = "https://ischool.uw.edu{query}",
+#'                        query = "/people/faculty",
+#'                        ischool = "University of Washington",
+#'                        faculty_selector = ".h1 > a",
+#'                        name_selector = "div > article > div.info > h1",
+#'                        title_selector = "div > article > div.info > em",
+#'                        email_selector = "div > article > div.info > address > a",
+#'                        phone_selector = NULL,
+#'                        phd_selector = NULL,
+#'                        spec_selector = ".sections > .specialization > ul > li",
+#'                        research_selector = ".sections > .research_areas > ul > li",
+#'                        bio_selector = ".sections > .biography",
+#'                        edu_selector = ".sections > .education > ul > li",
+#'                        pub_selector = ".pub > .title") {
+#' 
+#'   links <- scrape_faculty_pages(url = url, query = query, selector = faculty_selector)
+#' 
+#'   l <- lapply(links, 
+#'               collect_info, 
+#'               ischool = ischool,
+#'               name_selector = name_selector,
+#'               title_selector = title_selector,
+#'               email_selector = email_selector,
+#'               phone_selector = phone_selector,
+#'               phd_selector = phd_selector,
+#'               spec_selector = spec_selector,
+#'               research_selector = research_selector,
+#'               bio_selector = bio_selector,
+#'               edu_selector = edu_selector,
+#'               pub_selector = pub_selector)
+#' 
+#'   l <- collapse(l)
+#' 
+#'   return(l)
+#' }
+
 #' @title Scrape faculty page at University of Michigan
 faculty.um <- function(url = "https://www.si.umich.edu{query}",
                        query = "/people/directory/faculty?page={n}",
-                       faculty_selector = "div > div > div > h2 > a") {
+                       ischool = "University of Michigan",
+                       faculty_selector = "div > div > div > h2 > a",
+                       name_selector = "div > div > div > h1 > span",
+                       title_selector = "div > div > div > div > div > div.profile-card__left > span:nth-child(1) > strong",
+                       email_selector = "div > div > div > div > div > div.profile-card__left > span > a",
+                       phone_selector = NULL,
+                       phd_selector = "div > div > div > div > div > div.profile-card__right > span:nth-child(3)",
+                       spec_selector = NULL,
+                       research_selector = "div > div > div > div > ul > li",
+                       bio_selector = "div > div > div > div > div > p",
+                       edu_selector = "div > div > div > div > div > p",
+                       pub_selector = NULL) {
 
   queries <- glue::glue(query, n = 0:6)
 
@@ -250,99 +311,77 @@ faculty.um <- function(url = "https://www.si.umich.edu{query}",
 
   links <- unlist(links, recursive = FALSE)
 
-  l <- lapply(links,
+  l <- lapply(links, 
               collect_info, 
-              ischool = "University of Michigan",
-              name_selector = "div > div > div > h1 > span",
-              title_selector = "div > div > div > div > div > div.profile-card__left > span:nth-child(1) > strong",
-              email_selector = "div > div > div > div > div > div.profile-card__left > span > a",
-              phone_selector = NULL,
-              phd_selector = "div > div > div > div > div > div.profile-card__right > span:nth-child(3)",
-              spec_selector = NULL,
-              research_selector = "div > div > div > div > ul > li",
-              bio_selector = "div > div > div > div > div > p",
-              edu_selector = "div > div > div > div > div > p",
-              pub_selector = NULL)
-
+              ischool = ischool,
+              name_selector = name_selector,
+              title_selector = title_selector,
+              email_selector = email_selector,
+              phone_selector = phone_selector,
+              phd_selector = phd_selector,
+              spec_selector = spec_selector,
+              research_selector = research_selector,
+              bio_selector = bio_selector,
+              edu_selector = edu_selector,
+              pub_selector = pub_selector)
+  
   l <- collapse(l)
   
   return(l)
 }
 
-#' @title Scrape faculty page at University of Illinois
-faculty.illinois <- function(url = "https://ischool.illinois.edu{query}",
-                             query = "/people/faculty",
-                             faculty_selector = "div.profile-teaser__name > a") {
-
-  links <- scrape_faculty_pages(url = url, query = query, selector = faculty_selector)
-
-  l <- lapply(links, 
-              collect_info, 
-              ischool = "University of Illinois Urban Champagne",
-              name_selector = "#page-title > span",
-              title_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > p.profile__title",
-              email_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > div.profile__contact-information > p:nth-child(3)",
-              phone_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > div.profile__contact-information > p:nth-child(2) > a",
-              phd_selector = NULL,
-              spec_selector = NULL,
-              research_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > div.tag-list > ul > li > a",
-              bio_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > div:nth-child(7) > div > p:nth-child(1)",
-              edu_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > p.profile__education",
-              pub_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > div:nth-child(10) > div > p")
-
-  l <- collapse(l)
-
-  return(l)
-}
-
-#' @title Scrape faculty page at University of California Berkeley
-faculty.berkeley <- function(url = "https://www.ischool.berkeley.edu{query}",
-                             query = "/people?role=122&faculty_type=72",
-                             faculty_selector = "div.views-field.views-field-field-profile-fullname > h2 > a") {
-
-  links <- scrape_faculty_pages(url = url, query = query, selector = faculty_selector)
-
-  l <- lapply(links, 
-              collect_info, 
-              ischool = "University of California, Berkeley",
-              name_selector = "#main-content > div > div.center-wrapper > div.panel-col-first.panel-panel > div > div.panel-pane.pane-user-header > div.details > h1",
-              title_selector = "#main-content > div > div.center-wrapper > div.panel-col-first.panel-panel > div > div.panel-pane.pane-user-header > div.details > h2",
-              email_selector = "#main-content > div > div.center-wrapper > div.panel-col-first.panel-panel > div > div.panel-pane.pane-user-contact-info > div > div.user-contact-info-primary > div.field.field--name-field-profile-email.field--type-text.field--label-hidden > div > div > a",
-              phone_selector = "#main-content > div > div.center-wrapper > div.panel-col-first.panel-panel > div > div.panel-pane.pane-user-contact-info > div > div.user-contact-info-primary > div.field.field--name-field-profile-telephone.field--type-telephone.field--label-hidden > div > div > a",
-              phd_selector = NULL,
-              spec_selector = "#main-content > div > div.center-wrapper > div.panel-col-first.panel-panel > div > div.panel-pane.pane-user-focus > div",
-              research_selector = "#main-content > div > div.center-wrapper > div.panel-col-first.panel-panel > div > div.panel-pane.pane-user-research-areas > div > div > div > a",
-              bio_selector = NULL,
-              edu_selector = NULL,
-              pub_selector = "#main-content > div > div.center-wrapper > div.panel-col-last.panel-panel > div > div.panel-pane.pane-views-panes.pane-user-publications-panel-pane-1 > div > div > div > div > span > a")
-
-  l <- collapse(l)
-
-  return(l)
-}
-
-#' @title Scrape faculty page at University of Texas Austin
-faculty.ut <- function(url ="https://www.ischool.utexas.edu{query}",
-                       query = "/people/ischool-faculty-staff-students",
-                       faculty_selector = ".ppl_container > a") {
-
-  links <- scrape_faculty_pages(url = url, query = query, selector = faculty_selector)
-
-  l <- lapply(links, 
-              collect_info, 
-              ischool = "University of Texas, Austin",
-              name_selector = NULL,
-              title_selector = NULL,
-              email_selector = NULL,
-              phone_selector = NULL,
-              phd_selector = NULL,
-              spec_selector = NULL,
-              research_selector = NULL,
-              bio_selector = NULL,
-              edu_selector = NULL,
-              pub_selector = NULL)
-
-  l <- collapse(l)
-
-  return(l)
-}
+#' #' @title Scrape faculty page at University of Illinois
+#' faculty.illinois <- function(url = "https://ischool.illinois.edu{query}",
+#'                              query = "/people/faculty",
+#'                              faculty_selector = "div.profile-teaser__name > a",
+#'                              ischool = "University of Illinois Urban Champagne",
+#'                              name_selector = "#page-title > span",
+#'                              title_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > p.profile__title",
+#'                              email_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > div.profile__contact-information > p:nth-child(3)",
+#'                              phone_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > div.profile__contact-information > p:nth-child(2) > a",
+#'                              phd_selector = NULL,
+#'                              spec_selector = NULL,
+#'                              research_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > div.tag-list > ul > li > a",
+#'                              bio_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > div:nth-child(7) > div > p:nth-child(1)",
+#'                              edu_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > p.profile__education",
+#'                              pub_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > div:nth-child(10) > div > p") {
+#' 
+#' 
+#' }
+#' 
+#' #' @title Scrape faculty page at University of California Berkeley
+#' faculty.berkeley <- function(url = "https://www.ischool.berkeley.edu{query}",
+#'                              query = "/people?role=122&faculty_type=72",
+#'                              ischool = "University of California, Berkeley",
+#'                              faculty_selector = "div.views-field.views-field-field-profile-fullname > h2 > a",
+#'                              name_selector = "#main-content > div > div.center-wrapper > div.panel-col-first.panel-panel > div > div.panel-pane.pane-user-header > div.details > h1",
+#'                              title_selector = "#main-content > div > div.center-wrapper > div.panel-col-first.panel-panel > div > div.panel-pane.pane-user-header > div.details > h2",
+#'                              email_selector = "#main-content > div > div.center-wrapper > div.panel-col-first.panel-panel > div > div.panel-pane.pane-user-contact-info > div > div.user-contact-info-primary > div.field.field--name-field-profile-email.field--type-text.field--label-hidden > div > div > a",
+#'                              phone_selector = "#main-content > div > div.center-wrapper > div.panel-col-first.panel-panel > div > div.panel-pane.pane-user-contact-info > div > div.user-contact-info-primary > div.field.field--name-field-profile-telephone.field--type-telephone.field--label-hidden > div > div > a",
+#'                              phd_selector = NULL,
+#'                              spec_selector = "#main-content > div > div.center-wrapper > div.panel-col-first.panel-panel > div > div.panel-pane.pane-user-focus > div",
+#'                              research_selector = "#main-content > div > div.center-wrapper > div.panel-col-first.panel-panel > div > div.panel-pane.pane-user-research-areas > div > div > div > a",
+#'                              bio_selector = NULL,
+#'                              edu_selector = NULL,
+#'                              pub_selector = "#main-content > div > div.center-wrapper > div.panel-col-last.panel-panel > div > div.panel-pane.pane-views-panes.pane-user-publications-panel-pane-1 > div > div > div > div > span > a") {
+#' 
+#'   links <- scrape_faculty_pages(url = url, query = query, selector = faculty_selector)
+#' 
+#'   l <- lapply(links,
+#'               collect_info, 
+#'               ischool = ischool,
+#'               name_selector = name_selector,
+#'               title_selector = title_selector,
+#'               email_selector = email_selector,
+#'               phone_selector = phone_selector,
+#'               phd_selector = phd_selector,
+#'               spec_selector = spec_selector,
+#'               research_selector = research_selector,
+#'               bio_selector = bio_selector,
+#'               edu_selector = edu_selector,
+#'               pub_selector = pub_selector)
+#' 
+#'   l <- collapse(l)
+#' 
+#'   return(l)
+#' }

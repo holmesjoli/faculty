@@ -2,13 +2,15 @@ library(magrittr)
 
 sapply(list.files("R", full.names = TRUE, recursive = TRUE), source, .GlobalEnv)
 
-uw <- faculty.uw()
+uw <- do.call(collect_info_main, ischool.uw)
 
 um <- faculty.um()
 
-illinois <- faculty.illinois()
+illinois <- do.call(collect_info_main, ischool.illinois)
 
-berkeley <- faculty.berkeley()
+berkeley <- do.call(collect_info_main, ischool.berkeley)
+
+ut <- do.call(collect_info_main, ischool.ut)
 
 l <- list(uw, um, illinois, berkeley) %>% 
   purrr::transpose()
