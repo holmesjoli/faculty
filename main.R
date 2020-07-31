@@ -8,7 +8,9 @@ um <- faculty.um()
 
 illinois <- faculty.illinois()
 
-l <- list(uw, um, illinois) %>% 
+berkeley <- faculty.berkeley()
+
+l <- list(uw, um, illinois, berkeley) %>% 
   purrr::transpose()
 
 id <- do.call(rbind, l[["id"]]) %>% 
