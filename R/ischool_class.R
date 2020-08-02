@@ -10,7 +10,20 @@ ischool.uw <- structure(list(url = "https://ischool.uw.edu{query}",
                              bio_selector = ".sections > .biography",
                              edu_selector = ".sections > .education > ul > li",
                              pub_selector = ".pub > .title"),
-                        class = "ischool")
+                        class = "uw")
+
+ischool.um <- structure(list(url = "https://www.si.umich.edu{query}",
+                             query = "/people/directory/faculty?page={n}",
+                             ischool = "University of Michigan",
+                             faculty_selector = "div > div > div > h2 > a",
+                             name_selector = "div > div > div > h1 > span",
+                             title_selector = "div > div > div > div > div > div.profile-card__left > span:nth-child(1) > strong",
+                             email_selector = "div > div > div > div > div > div.profile-card__left > span > a",
+                             phd_selector = "div > div > div > div > div > div.profile-card__right > span:nth-child(3)",
+                             research_selector = "div > div > div > div > ul > li",
+                             bio_selector = "div > div > div > div > div > p",
+                             edu_selector = "div > div > div > div > div > p"),
+                        class = "um")
 
 ischool.illinois <- structure(list(url = "https://ischool.illinois.edu{query}",
                                    query = "/people/faculty",
@@ -25,7 +38,7 @@ ischool.illinois <- structure(list(url = "https://ischool.illinois.edu{query}",
                                    edu_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > p.profile__education",
                                    pub_selector = "body > div.dialog-off-canvas-main-canvas > main > div > div.basic-page__guttered-content > div.basic-page__main > div > article > div > div.profile__core-content > div:nth-child(10) > div > p",
                                    delay = 2),
-                              class = "ischool")
+                              class = "illinois")
 
 ischool.berkeley <- structure(list(url = "https://www.ischool.berkeley.edu{query}",
                                    query = "/people?role=122&faculty_type=72",
@@ -38,21 +51,31 @@ ischool.berkeley <- structure(list(url = "https://www.ischool.berkeley.edu{query
                                    spec_selector = "#main-content > div > div.center-wrapper > div.panel-col-first.panel-panel > div > div.panel-pane.pane-user-focus > div",
                                    research_selector = "#main-content > div > div.center-wrapper > div.panel-col-first.panel-panel > div > div.panel-pane.pane-user-research-areas > div > div > div > a",
                                    pub_selector = "#main-content > div > div.center-wrapper > div.panel-col-last.panel-panel > div > div.panel-pane.pane-views-panes.pane-user-publications-panel-pane-1 > div > div > div > div > span > a"),
-                              class = "ischool")
+                              class = "berkeley")
 
 ischool.ut <- structure(list(url ="https://www.ischool.utexas.edu{query}",
                              query = "/people/ischool-faculty-staff-students",
                              ischool = "University of Texas, Austin",
                              faculty_selector = ".ppl_container > a",
                              name_selector = ".basic_info > h2",
-                             title_selector = ".basic_info > .position",
+                             title_selector = ".basic_info > .position:nth-child(3)",
                              email_selector = ".basic_info > div > p > a:nth-child(2)",
-                             phone_selector = NULL,
-                             phd_selector = NULL,
-                             spec_selector = NULL,
                              research_selector = "div > div > div > div > p",
                              bio_selector = "div > div > div > div:nth-child(4)",
                              edu_selector = "div > div > div > div",
-                             pub_selector = ".dcpt_part > .bibliography_cite",
-                             delay = NULL),
-                        class = "ischool")
+                             pub_selector = ".dcpt_part > .bibliography_cite"),
+                        class = "ut")
+
+ischool.unc <- structure(list(url = "https://sils.unc.edu{query}",
+                              query = "/directory/faculty",
+                              ischool = "University of North Carolina",
+                              faculty_selector = "div.views-field.views-field-title > span > a",
+                              name_selector = "#page-title",
+                              title_selector = "div > div.field.field-name-field-faculty-title.field-type-text.field-label-hidden.view-mode-full > div > div",
+                              email_selector = "div.field.field-name-field-faculty-email-address.field-type-email.field-label-hidden.view-mode-full > div > div",
+                              phone_selector = "div.field.field-name-field-faculty-phone.field-type-text.field-label-hidden.view-mode-full > div > div",
+                              research_selector = "div > section > div > div",
+                              edu_selector = "div > div.field.field-name-body.field-type-text-with-summary.field-label-hidden.view-mode-full > div > div > p:nth-child(1)",
+                              bio_selector = "div > div.field.field-name-body.field-type-text-with-summary.field-label-hidden.view-mode-full > div > div > p:nth-child(2)",
+                              course_selector = "div > div.field.field-name-body.field-type-text-with-summary.field-label-hidden.view-mode-full > div > div > p:nth-child(3)"),
+                         class = "unc")
