@@ -133,7 +133,7 @@ collect_info <- function(link, ischool,
                          delay = NULL) {
 
   page <- xml2::read_html(link)
-# browser()
+
   name <- scrape_text(page = page, selector = name_selector)
   assertthat::assert_that(length(name) == 1 | is.null(name))
 
