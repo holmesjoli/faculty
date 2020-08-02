@@ -4,19 +4,14 @@ sapply(list.files("R", full.names = TRUE, recursive = TRUE), source, .GlobalEnv)
 
 config <- yaml::read_yaml("config.yaml")
 
-uw <- do.call(collect_info_main, create_cls(config$uw))
-
-um <- do.call(collect_info_main, create_cls(config$um))
-
-illinois <- do.call(collect_info_main, create_cls(config$illinois))
-
-berkeley <- do.call(collect_info_main, create_cls(config$berkeley))
-
-ut <- do.call(collect_info_main, create_cls(config$ut))
-
-unc <- do.call(collect_info_main, create_cls(config$unc))
-
-l <- list(uw, um, illinois, berkeley, ut, unc) %>% 
+l <- list(do.call(collect_info_main, args = create_cls(config$uw)),
+          do.call(collect_info_main, args = create_cls(config$um)),
+          do.call(collect_info_main, args = create_cls(config$illinois)),
+          do.call(collect_info_main, args = create_cls(config$berkeley)),
+          do.call(collect_info_main, args = create_cls(config$ut)), 
+          do.call(collect_info_main, args = create_cls(config$unc))
+          # do.call(collect_info, args = create_cls(config$syracuse))
+          ) %>% 
   purrr::transpose()
 
 id <- do.call(rbind, l[["id"]]) %>% 
@@ -51,3 +46,8 @@ write.csv(edu, "./data/education.csv", row.names = FALSE)
 pub <- do.call(rbind, l[["pub"]]) %>% 
   dplyr::filter(name %in% potential_adv)
 write.csv(pub, "./data/publications.csv", row.names = FALSE)
+
+courses <- do.call(rbind, l[["courses"]]) %>% 
+  dplyr::filter(name %in% potential_adv)
+
+write.csv(courses, "./data/courses.csv", row.names = FALSE)
