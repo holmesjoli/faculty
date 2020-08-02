@@ -95,5 +95,8 @@ syracuse:
   title_selector: "div > div.fusion-fullwidth.fullwidth-box.fusion-builder-row-1.hero.bg-lt-gray.branded-corners.blue-headline.blue-text.nonhundred-percent-fullwidth.non-hundred-percent-height-scrolling > div > div > div > div.fusion-text > h5:nth-child(2)"
   phone_selector: "div > div.fusion-fullwidth.fullwidth-box.fusion-builder-row-1.hero.bg-lt-gray.branded-corners.blue-headline.blue-text.nonhundred-percent-fullwidth.non-hundred-percent-height-scrolling > div > div > div > div.fusion-text > h5:nth-child(4)"
   email_selector: "div > div.fusion-fullwidth.fullwidth-box.fusion-builder-row-1.hero.bg-lt-gray.branded-corners.blue-headline.blue-text.nonhundred-percent-fullwidth.non-hundred-percent-height-scrolling > div > div > div > div.fusion-text > h5:nth-child(5)"
-  course_selector: "div > div.fusion-fullwidth.fullwidth-box.fusion-builder-row-2.nonhundred-percent-fullwidth.non-hundred-percent-height-scrolling > div > div.fusion-layout-column.fusion_builder_column.fusion_builder_column_2_3.fusion-builder-column-2.fusion-two-third.fusion-column-last.\32 _3 > div > div.fusion-text > ul > li"
-  bio_selector: "div > div.fusion-fullwidth.fullwidth-box.fusion-builder-row-2.nonhundred-percent-fullwidth.non-hundred-percent-height-scrolling > div > div.fusion-layout-column.fusion_builder_column.fusion_builder_column_2_3.fusion-builder-column-2.fusion-two-third.fusion-column-last.\32 _3 > div > div.fusion-text > p"
+  course_selector: "div > div.fusion-text > ul > li"
+  bio_selector: "div > div.fusion-text > p"
+  class: "syracuse"
+
+
