@@ -2,17 +2,21 @@ library(magrittr)
 
 sapply(list.files("R", full.names = TRUE, recursive = TRUE), source, .GlobalEnv)
 
-uw <- do.call(collect_info_main, ischool.uw)
+config <- yaml::read_yaml("config.yaml")
 
-um <- faculty.um()
+uw <- do.call(collect_info_main, create_cls(config$uw))
 
-illinois <- do.call(collect_info_main, ischool.illinois)
+um <- do.call(collect_info_main, create_cls(config$um))
 
-berkeley <- do.call(collect_info_main, ischool.berkeley)
+illinois <- do.call(collect_info_main, create_cls(config$illinois))
 
-ut <- do.call(collect_info_main, ischool.ut)
+berkeley <- do.call(collect_info_main, create_cls(config$berkeley))
 
-l <- list(uw, um, illinois, berkeley) %>% 
+ut <- do.call(collect_info_main, create_cls(config$ut))
+
+unc <- do.call(collect_info_main, create_cls(config$unc))
+
+l <- list(uw, um, illinois, berkeley, ut, unc) %>% 
   purrr::transpose()
 
 id <- do.call(rbind, l[["id"]]) %>% 
@@ -21,29 +25,29 @@ id <- do.call(rbind, l[["id"]]) %>%
   dplyr::filter(assistant | associate) %>% 
   dplyr::filter(adjunct == FALSE & emeritus == FALSE & lecturer == FALSE & research_fellow == FALSE)
 
-potential_adv <- id$email
+potential_adv <- id$name
 
 write.csv(id, "./data/id.csv", row.names = FALSE)
 
 specializations <- do.call(rbind, l[["specializations"]]) %>% 
-  dplyr::filter(email %in% potential_adv)
+  dplyr::filter(name %in% potential_adv)
 write.csv(specializations, "./data/specializations.csv", row.names = FALSE)
 
 research_area <- do.call(rbind, l[["research_area"]]) %>% 
   parse.research_area() %>% 
-  dplyr::filter(email %in% potential_adv)
+  dplyr::filter(name %in% potential_adv)
 write.csv(research_area, "./data/research_area.csv", row.names = FALSE)
 
 bio <- do.call(rbind, l[["bio"]]) %>% 
-  dplyr::filter(email %in% potential_adv)
+  dplyr::filter(name %in% potential_adv)
 write.csv(bio, "./data/biography.csv", row.names = FALSE)
 
 edu <- do.call(rbind, l[["edu"]]) %>% 
-  dplyr::filter(email %in% potential_adv) %>% 
+  dplyr::filter(name %in% potential_adv) %>% 
   parse.edu() %>% 
   dplyr::filter(degree >= 1)
 write.csv(edu, "./data/education.csv", row.names = FALSE)
 
 pub <- do.call(rbind, l[["pub"]]) %>% 
-  dplyr::filter(email %in% potential_adv)
+  dplyr::filter(name %in% potential_adv)
 write.csv(pub, "./data/publications.csv", row.names = FALSE)
